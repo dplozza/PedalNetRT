@@ -75,6 +75,8 @@ class WaveNet(nn.Module):
         out = x
         skips = []
         out = self.input_layer(out)
+        
+        relu = nn.ReLU()
 
         for hidden, residual in zip(self.hidden, self.residuals):
             x = out
@@ -85,7 +87,7 @@ class WaveNet(nn.Module):
             out_hidden_split = torch.split(out_hidden, self.num_channels, dim=1)
             #out = torch.tanh(out_hidden_split[0]) * torch.sigmoid(out_hidden_split[1])
             
-            out = torch.ReLU(out_hidden_split[0])# * torch.sigmoid(out_hidden_split[1])
+            out = relu(out_hidden_split[0])# * torch.sigmoid(out_hidden_split[1])
 
             skips.append(out)
 

@@ -2,10 +2,10 @@ import pytorch_lightning as pl
 import argparse
 import sys
 
-from model2 import PedalNet
+from model_relu import PedalNet
 from prepare import prepare
 
-#python train2.py data/ts9_test1_in_FP32.wav data/ts9_test1_out_FP32.wav --cpu --max_epochs 1
+# python train2.py data/ts9_test1_in_FP32.wav data/ts9_test1_out_FP32.wav --cpu --max_epochs 1
 
 def main(args):
     """
