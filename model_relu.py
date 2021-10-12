@@ -87,7 +87,9 @@ class WaveNet(nn.Module):
             out_hidden_split = torch.split(out_hidden, self.num_channels, dim=1)
             #out = torch.tanh(out_hidden_split[0]) * torch.sigmoid(out_hidden_split[1])
             
-            out = relu(out_hidden_split[0])# * torch.sigmoid(out_hidden_split[1])
+            out = torch.tanh(out_hidden_split[0])
+
+            #out = relu(out_hidden_split[0])# * torch.sigmoid(out_hidden_split[1])
 
             skips.append(out)
 
