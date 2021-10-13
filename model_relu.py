@@ -8,31 +8,6 @@ import pickle
 import os
 
 
-class CausalConv1d(torch.nn.Conv1d):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, dilation=1, groups=1, bias=True):
-        #CHANGE: don't pad shit
-        #self.__padding = (kernel_size - 1) * dilation
-        self.__padding = 0
-
-
-        super(CausalConv1d, self).__init__(
-            in_channels,
-            out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=self.__padding,
-            dilation=dilation,
-            groups=groups,
-            bias=bias,
-        )
-
-    def forward(self, input):
-        result = super(CausalConv1d, self).forward(input)
-        #if self.__padding != 0:
-        #    return result[:, :, : -self.__padding]
-        return result
-
-
 def _conv_stack(dilations, in_channels, out_channels, kernel_size):
     """
     Create stack of dilated convolutional layers, outlined in WaveNet paper:
@@ -40,7 +15,7 @@ def _conv_stack(dilations, in_channels, out_channels, kernel_size):
     """
     return nn.ModuleList(
         [
-            CausalConv1d(
+            torch.nn.Conv1d(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 dilation=d,
@@ -55,10 +30,11 @@ class WaveNet(nn.Module):
     def __init__(self, num_channels, dilation_depth, num_repeat, kernel_size=2):
         super(WaveNet, self).__init__()
         dilations = [2 ** d for d in range(dilation_depth)] * num_repeat
-        internal_channels = int(num_channels * 2)
-        self.hidden = _conv_stack(dilations, num_channels, internal_channels, kernel_size)
+
+        self.hidden = _conv_stack(dilations, num_channels, num_channels, kernel_size)
         self.residuals = _conv_stack(dilations, num_channels, num_channels, 1)
-        self.input_layer = CausalConv1d(
+
+        self.input_layer = torch.nn.Conv1d(
             in_channels=1,
             out_channels=num_channels,
             kernel_size=1,
@@ -84,12 +60,11 @@ class WaveNet(nn.Module):
 
             # gated activation
             #   split (32,16,3) into two (16,16,3) for tanh and sigm calculations
-            out_hidden_split = torch.split(out_hidden, self.num_channels, dim=1)
-            #out = torch.tanh(out_hidden_split[0]) * torch.sigmoid(out_hidden_split[1])
-            
-            out = torch.tanh(out_hidden_split[0])
+            #out_hidden_split = torch.split(out_hidden, self.num_channels, dim=1)
+            #out = torch.tanh(out_hidden_split[0]) * torch.sigmoid(out_hidden_split[1]) 
+            #out = torch.tanh(out_hidden_split[0])
 
-            #out = relu(out_hidden_split[0])# * torch.sigmoid(out_hidden_split[1])
+            out = relu(out_hidden)
 
             skips.append(out)
 
