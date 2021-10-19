@@ -32,7 +32,7 @@ class WaveNet(nn.Module):
         dilations = [2 ** d for d in range(dilation_depth)] * num_repeat
 
         self.hidden = _conv_stack(dilations, num_channels, num_channels, kernel_size)
-        self.residuals = _conv_stack(dilations, num_channels, num_channels, 1)
+        #self.residuals = _conv_stack(dilations, num_channels, num_channels, 1)
 
         self.input_layer = torch.nn.Conv1d(
             in_channels=1,
@@ -41,7 +41,8 @@ class WaveNet(nn.Module):
         )
 
         self.linear_mix = nn.Conv1d(
-            in_channels=num_channels * dilation_depth * num_repeat//2,
+            #in_channels=num_channels * dilation_depth * num_repeat//2,
+            in_channels=num_channels,
             out_channels=1,
             kernel_size=1,
         )
@@ -49,13 +50,15 @@ class WaveNet(nn.Module):
 
     def forward(self, x):
         out = x
-        skips = []
+        skips = []#
         out = self.input_layer(out)
         
         relu = nn.ReLU()
 
         i = 0
-        for hidden, residual in zip(self.hidden, self.residuals):
+        #for hidden, residual in zip(self.hidden, self.residuals):
+        for hidden in self.hidden:
+            x = out
             x = out
             out_hidden = hidden(x)
 
@@ -67,16 +70,18 @@ class WaveNet(nn.Module):
 
             out = relu(out_hidden)
 
-            if i%2==0:
-                skips.append(out)
-            i+=1
+            #if i%2==0:
+            #    skips.append(out)
+            #i+=1
 
-            out = residual(out)
-            out = out + x[:, :, -out.size(2) :]
+            #out = residual(out)
+            #out = out + x[:, :, -out.size(2) :]
 
         # modified "postprocess" step:
-        out = torch.cat([s[:, :, -out.size(2) :] for s in skips], dim=1)
+        #out = torch.cat([s[:, :, -out.size(2) :] for s in skips], dim=1)
+        
         out = self.linear_mix(out)
+        
         return out
 
 
