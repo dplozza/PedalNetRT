@@ -2,7 +2,7 @@ import pytorch_lightning as pl
 import argparse
 import sys
 
-from model_relu import PedalNet
+#from model_relu import PedalNet
 from prepare import prepare
 
 # python train2.py data/ts9_test1_in_FP32.wav data/ts9_test1_out_FP32.wav --cpu --max_epochs 1
@@ -18,7 +18,18 @@ def main(args):
 
     """
 
+    if args.model_type=="model_relu":
+        from model_relu import PedalNet
+    elif args.model_type=="model_relu_skipless":
+        from model_relu_skipless import PedalNet
+    elif args.model_type=="model":
+        from model import PedalNet
+    else:
+        print("Invalid model type")
+ 
+
     prepare(args)
+    print(vars(args))
     model = PedalNet(vars(args))
     trainer = pl.Trainer(
         resume_from_checkpoint=args.model if args.resume else None,
@@ -38,6 +49,8 @@ if __name__ == "__main__":
     parser.add_argument("out_file", nargs="?", default="data/out.wav")
     parser.add_argument("--sample_time", type=float, default=100e-3)
 
+    parser.add_argument("--in_bit_depth", type=str, default="None")#input quantization
+
     parser.add_argument("--num_channels", type=int, default=12)
     parser.add_argument("--dilation_depth", type=int, default=10)
     parser.add_argument("--num_repeat", type=int, default=1)
@@ -53,5 +66,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--model", type=str, default="models/pedalnet2/pedalnet2.ckpt")
     parser.add_argument("--resume", action="store_true")
+
+    parser.add_argument("--model_type", type=str, default="model_relu")
+
     args = parser.parse_args()
     main(args)
