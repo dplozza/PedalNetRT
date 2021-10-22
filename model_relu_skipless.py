@@ -27,7 +27,7 @@ def _conv_stack(dilations, in_channels, out_channels, kernel_size):
 
 
 class WaveNet(nn.Module):
-    def __init__(self, num_channels, dilation_depth, num_repeat, kernel_size=2,in_bit_depth=None):
+    def __init__(self, num_channels, dilation_depth, num_repeat, kernel_size=2, in_bit_depth=None):
         """
         Args:
             in_bit_depth (int): input will be quantized to this bit depth. If None: no quantization
@@ -38,7 +38,7 @@ class WaveNet(nn.Module):
         self.in_bit_depth = in_bit_depth
 
         self.hidden = _conv_stack(dilations, num_channels, num_channels, kernel_size)
-        self.residuals = _conv_stack(dilations, num_channels, num_channels, 1)
+        #self.residuals = _conv_stack(dilations, num_channels, num_channels, 1)
 
         self.input_layer = torch.nn.Conv1d(
             in_channels=1,
@@ -47,7 +47,8 @@ class WaveNet(nn.Module):
         )
 
         self.linear_mix = nn.Conv1d(
-            in_channels=num_channels * dilation_depth * num_repeat,
+            #in_channels=num_channels * dilation_depth * num_repeat//2,
+            in_channels=num_channels,
             out_channels=1,
             kernel_size=1,
         )
@@ -63,12 +64,15 @@ class WaveNet(nn.Module):
             x = x_q.type(torch.FloatTensor)/scaling
 
         out = x
-        skips = []
+        skips = []#
         out = self.input_layer(out)
         
         relu = nn.ReLU()
-        
-        for hidden, residual in zip(self.hidden, self.residuals):
+
+        i = 0
+        #for hidden, residual in zip(self.hidden, self.residuals):
+        for hidden in self.hidden:
+            x = out
             x = out
             out_hidden = hidden(x)
 
@@ -80,17 +84,18 @@ class WaveNet(nn.Module):
 
             out = relu(out_hidden)
 
-            skips.append(out)
+            #if i%2==0:
+            #    skips.append(out)
+            #i+=1
 
-            out = residual(out)
-            out = out + x[:, :, -out.size(2) :]
+            #out = residual(out)
+            #out = out + x[:, :, -out.size(2) :]
 
         # modified "postprocess" step:
-        out = torch.cat([s[:, :, -out.size(2) :] for s in skips], dim=1)
-        self.out_skips = out
-        #print(out.shape)
-        self.skips = skips
+        #out = torch.cat([s[:, :, -out.size(2) :] for s in skips], dim=1)
+        
         out = self.linear_mix(out)
+        
         return out
 
 
