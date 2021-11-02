@@ -78,7 +78,7 @@ if __name__ == "__main__":
     parser.add_argument("--tpu_cores", type=int, default=None)
     parser.add_argument("--cpu", action="store_true")
 
-    parser.add_argument("--model", type=str, default="models/pedalnet2/pedalnet2.ckpt")
+    parser.add_argument("--model", type=str, default="models/pedalnet/pedalnet.ckpt")
     parser.add_argument("--resume", action="store_true")
 
     parser.add_argument("--model_type", type=str, default="model_relu")
