@@ -1,11 +1,21 @@
 import pytorch_lightning as pl
+
 import argparse
 import sys
+import time
 
 #from model_relu import PedalNet
 from prepare import prepare
 
 # python train2.py data/ts9_test1_in_FP32.wav data/ts9_test1_out_FP32.wav --cpu --max_epochs 1
+
+def gen_timestamp_name() -> str:
+    """generate a timestap to use as filename"""
+    secondsSinceEpoch = time.time() # Get the seconds since epoch 
+    timeObj = time.localtime(secondsSinceEpoch) # Convert seconds since epoch to struct_time
+    name = '%04d.%02d.%02d-%02d%02d%02d' % (
+    timeObj.tm_year, timeObj.tm_mon, timeObj.tm_mday, timeObj.tm_hour, timeObj.tm_min, timeObj.tm_sec)
+    return name
 
 def main(args):
     """
@@ -31,11 +41,15 @@ def main(args):
     prepare(args)
     print(vars(args))
     model = PedalNet(vars(args))
+    version = gen_timestamp_name()
+    version += "_"+args.model.split('/')[-1].split('.')[-2]
+    logger = pl.loggers.TensorBoardLogger("lightning_logs", name="",version=version)
     trainer = pl.Trainer(
         resume_from_checkpoint=args.model if args.resume else None,
         gpus=None if args.cpu or args.tpu_cores else args.gpus,
         tpu_cores=args.tpu_cores,
-        log_every_n_steps=100,
+        log_every_n_steps=50,#100,
+        logger=logger,
         max_epochs=args.max_epochs,
     )
 
@@ -64,7 +78,7 @@ if __name__ == "__main__":
     parser.add_argument("--tpu_cores", type=int, default=None)
     parser.add_argument("--cpu", action="store_true")
 
-    parser.add_argument("--model", type=str, default="models/pedalnet2/pedalnet2.ckpt")
+    parser.add_argument("--model", type=str, default="models/pedalnet/pedalnet.ckpt")
     parser.add_argument("--resume", action="store_true")
 
     parser.add_argument("--model_type", type=str, default="model_relu")
