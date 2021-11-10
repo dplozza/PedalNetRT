@@ -27,13 +27,13 @@ def _conv_stack(dilations, in_channels, out_channels, kernel_size):
 
 
 class WaveNet(nn.Module):
-    def __init__(self, num_channels, dilation_depth, num_repeat, kernel_size=2,in_bit_depth='None'):
+    def __init__(self, num_channels, dilation_depth, num_repeat, kernel_size=2,dilation_power=2,in_bit_depth='None'):
         """
         Args:
             in_bit_depth (str): input will be quantized to this bit depth. If None: no quantization {'8','None'}
         """
         super(WaveNet, self).__init__()
-        dilations = [2 ** d for d in range(dilation_depth)] * num_repeat
+        dilations = [dilation_power ** d for d in range(dilation_depth)] * num_repeat
 
         self.in_bit_depth = in_bit_depth
 
