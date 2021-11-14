@@ -1,8 +1,10 @@
 import pytorch_lightning as pl
+from pytorch_lightning.callbacks import ModelCheckpoint
 
 import argparse
 import sys
 import time
+import os
 
 #from model_relu import PedalNet
 from prepare import prepare
@@ -48,7 +50,18 @@ def main(args):
     version = gen_timestamp_name()
     version += "_"+args.model.split('/')[-1].split('.')[-2]
     logger = pl.loggers.TensorBoardLogger("lightning_logs", name="",version=version)
+
+    # use checkpoint callback to store BEST model according to validation loss
+    checkpoint_callback = ModelCheckpoint(
+        monitor="val_loss",
+        dirpath=os.path.dirname(args.model),
+        filename="test-{epoch:02d}-{val_loss:.2f}",
+        save_top_k=1, #only store the best model
+        mode="min",
+    )
+
     trainer = pl.Trainer(
+        callbacks=[checkpoint_callback],
         resume_from_checkpoint=args.model if args.resume else None,
         gpus=None if args.cpu or args.tpu_cores else args.gpus,
         tpu_cores=args.tpu_cores,
@@ -59,6 +72,9 @@ def main(args):
 
     trainer.fit(model)
     trainer.save_checkpoint(args.model)
+
+    #get best model etc
+    print("Best model:", checkpoint_callback.best_model_score,"  saved at:", checkpoint_callback.best_model_path)
 
 
 if __name__ == "__main__":

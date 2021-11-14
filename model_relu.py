@@ -53,6 +53,8 @@ class WaveNet(nn.Module):
         )
         self.num_channels = num_channels
 
+        self.relu = nn.ReLU()
+
     def forward(self, x):
 
         #input quantization:
@@ -66,8 +68,6 @@ class WaveNet(nn.Module):
         skips = []
         out = self.input_layer(out)
         
-        relu = nn.ReLU()
-        
         for hidden, residual in zip(self.hidden, self.residuals):
             x = out
             out_hidden = hidden(x)
@@ -78,11 +78,11 @@ class WaveNet(nn.Module):
             #out = torch.tanh(out_hidden_split[0]) * torch.sigmoid(out_hidden_split[1]) 
             #out = torch.tanh(out_hidden_split[0])
 
-            out = relu(out_hidden)
+            out = self.relu(out_hidden)
 
             skips.append(out)
 
-            out = residual(out)
+            out = residual(out) #IMPORTANT: for last dilated layer, this step DOES NOT MAKE SENSE!!! -> skippeda
             out = out + x[:, :, -out.size(2) :]
 
         # modified "postprocess" step:
