@@ -38,6 +38,8 @@ def main(args):
         from model_relu_stripped import PedalNet
     elif args.model_type=="model_relu_betterskip":
         from model_relu_betterskip import PedalNet
+    elif args.model_type=="model_relu_clamp":
+        from model_relu_clamp import PedalNet
     elif args.model_type=="model":
         from model import PedalNet
     else:
