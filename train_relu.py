@@ -9,7 +9,7 @@ import os
 #from model_relu import PedalNet
 from prepare import prepare
 
-# python train2.py data/ts9_test1_in_FP32.wav data/ts9_test1_out_FP32.wav --cpu --max_epochs 1
+# python train_relu.py data/ts9_test1_in_FP32.wav data/ts9_test1_out_FP32.wav --cpu --max_epochs 1
 
 def gen_timestamp_name() -> str:
     """generate a timestap to use as filename"""
@@ -40,6 +40,8 @@ def main(args):
         from model_relu_betterskip import PedalNet
     elif args.model_type=="model_relu_clamp":
         from model_relu_clamp import PedalNet
+    elif args.model_type=="model_relu_ai8x":
+        from model_relu_ai8x import PedalNet
     elif args.model_type=="model":
         from model import PedalNet
     else:

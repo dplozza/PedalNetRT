@@ -146,4 +146,6 @@ cython_debug/
 slurm_log/
 
 # test wav files
-model/**/.wav
+models/**/.wav
+
+models/
