@@ -42,6 +42,8 @@ def main(args):
         from model_relu_clamp import PedalNet
     elif args.model_type=="model_relu_ai8x":
         from model_relu_ai8x import PedalNet
+    elif args.model_type=="model_gated":
+        from model_gated import PedalNet
     elif args.model_type=="model":
         from model import PedalNet
     else:
