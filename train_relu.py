@@ -64,6 +64,7 @@ def main(args):
         filename="test-{epoch:02d}-{val_loss:.2f}",
         save_top_k=1, #only store the best model
         mode="min",
+        every_n_epochs = args.save_epochs #save model every n epochs
     )
 
     trainer = pl.Trainer(
@@ -109,6 +110,8 @@ if __name__ == "__main__":
     parser.add_argument("--resume", action="store_true")
 
     parser.add_argument("--model_type", type=str, default="model_relu")
+
+    parser.add_argument("--save_epochs", type=int, default="0",help="Save model every n epoch. Don't save if 0")
 
     args = parser.parse_args()
     main(args)
