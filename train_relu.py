@@ -64,7 +64,7 @@ def main(args):
         filename="test-{epoch:02d}-{val_loss:.2f}",
         save_top_k=1, #only store the best model
         mode="min",
-        every_n_epochs = args.save_epochs #save model every n epochs
+        period = args.save_epochs #save model every n epochs
     )
 
     trainer = pl.Trainer(
@@ -90,7 +90,7 @@ if __name__ == "__main__":
     parser.add_argument("out_file", nargs="?", default="data/out.wav")
     parser.add_argument("--sample_time", type=float, default=100e-3)
 
-    parser.add_argument("--in_bit_depth", type=str, default="None")#input quantization
+    parser.add_argument("--in_bit_depth", type=str, default="None") #input quantization
 
     parser.add_argument("--num_channels", type=int, default=12)
     parser.add_argument("--dilation_depth", type=int, default=10)
