@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import json
 
 # import wave
 from scipy.io import wavfile
@@ -22,7 +23,7 @@ def error_to_signal(y, y_pred, use_filter=1):
 
 
 def pre_emphasis_filter(x, coeff=0.95):
-    return np.concatenate([x, np.subtract(x, np.multiply(x, coeff))])
+    return np.concatenate([x[0:1], np.subtract(x[1:], np.multiply(x[:-1], coeff))])
 
 
 def read_wave(wav_file):
@@ -57,6 +58,8 @@ def analyze_pred_vs_actual(args):
     # Read the input wav file
     signal3, fs3 = read_wave(input_wav)
 
+    print(signal3.shape)
+
     # Read the output wav file
     signal1, fs = read_wave(output_wav)
 
@@ -86,6 +89,18 @@ def analyze_pred_vs_actual(args):
     e2s_no_filter = error_to_signal(signal1, signal2, use_filter=0)
     print("Error to signal (with pre-emphasis filter): ", e2s)
     print("Error to signal (no pre-emphasis filter): ", e2s_no_filter)
+
+    print(error_to_signal(signal1, signal2))
+    print(error_to_signal(signal1, signal2,use_filter=0))
+
+    with open(model+'/score.txt', 'w') as f:
+        f.write('ESR_pre: ' + str(round(e2s, 5)) + '\n')
+        f.write('ESR: ' + str(round(e2s_no_filter, 5)) + '\n')
+    
+    scores = {"ESR_pre":float(e2s),"ESR":float(e2s_no_filter)}
+    json.dump( scores, open( model+"/score.json", 'w' ) )
+    
+
     fig.suptitle("Predicted vs Actual Signal (error to signal: " + str(round(e2s, 4)) + ")")
     # Plot signal difference
     signal_diff = signal2 - signal1
