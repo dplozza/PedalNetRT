@@ -58,8 +58,6 @@ def analyze_pred_vs_actual(args):
     # Read the input wav file
     signal3, fs3 = read_wave(input_wav)
 
-    print(signal3.shape)
-
     # Read the output wav file
     signal1, fs = read_wave(output_wav)
 

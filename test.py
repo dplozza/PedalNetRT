@@ -9,7 +9,7 @@ import os
 
 
 def save(name, data,sr=4410):
-    wavfile.write(name, sr, data.flatten().astype(np.float32))
+    wavfile.write(name, sr, data.flatten().astype(np.float32)*0.001)
 
 
 @torch.no_grad()
@@ -22,6 +22,9 @@ def test(args):
     else:
         data_path = args.data
     data = pickle.load(open(data_path, "rb"))
+
+    print("x_test_max:",data["x_test"].max())
+    print("x_test orig max:",(data["x_test"] * data["std"] + data["mean"]).max())
 
     x_test = data["x_test"]
     prev_sample = np.concatenate((np.zeros_like(x_test[0:1]), x_test[:-1]), axis=0)
