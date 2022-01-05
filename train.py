@@ -49,7 +49,7 @@ def main(args):
     else:
         print("Invalid model type")
  
-
+    args.name="data"
     prepare(args)
     print(vars(args))
     model = PedalNet(vars(args))
